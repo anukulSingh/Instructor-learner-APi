@@ -35,7 +35,7 @@ router
 
 
 router
-    .route('/:id')
+    .route('/:bootcampId')
     .get(getBootcamp)
     .patch(auth,authorize('publisher','admin'),updateBootcamp)
     .delete(auth,authorize('publisher','admin'), deleteBootcamp)

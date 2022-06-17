@@ -1,7 +1,6 @@
 <div class="container-fluid">
 
-<<<<<<< HEAD
-# DevCourses API
+# API documentation
 
 
 
@@ -2576,15 +2575,5 @@ JSON content type
 
 </div>
 
-<footer class="navbar-default navbar-fixed-bottom">
-
-<div class="container-fluid">
-
-<div class="span12 text-center"><span data-toggle="tooltip" title="If the application help you, please feel free to give a star to the project in github. Your star inspire me to work more on open-source projects like this!">Made with _♥_ by [thedevsaddam](https://github.com/thedevsaddam) | Generated at: 2021-06-24 10:13:36 by [docgen](https://github.com/thedevsaddam/docgen)</span></div>
 
 </div>
-
-</footer>
-
-</div>
->>>>>>> a576480 (cleaning fles)

@@ -1,7 +1,6 @@
 const path = require('path')
 const express = require('express');
 const dotenv = require('dotenv');
-const colors = require('colors');
 const cookieParser = require('cookie-parser')
 const mongoSanitize = require('express-mongo-sanitize')
 const helmet = require('helmet');
@@ -83,7 +82,7 @@ const server = app.listen(
      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold)
 );
 
-process.on('unhandledRejection', (err, promise) => {
+process.on('unhandledRejection', (err) => {
     console.error(`Error: ${err.message}`.red);
     server.close(() => process.exit(1));
 })

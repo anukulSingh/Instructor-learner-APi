@@ -20,7 +20,7 @@ router.route('/')
     )
     .post(auth,authorize('publisher','admin'), addCourse)
 
-router.route('/:id')
+router.route('/:courseId')
     .get(getCourse)
     .put(auth,authorize('publisher','admin'),updateCourse)
     .delete(auth,authorize('publisher','admin'),deleteCourse)

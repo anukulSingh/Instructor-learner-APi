@@ -12,9 +12,9 @@ exports.auth = asyncHandler(async (req, res, next) => {
         token = req.headers.authorization.split(' ')[1]
     }
     // set token from cookie
-    // else if (req.cookies.token) {
-    //     token = req.cookies.token
-    // }
+    else if (req.cookies.token) {
+        token = req.cookies.token
+    }
 
     if (!token) {
         return next(new ErrorResponse('Unauthorized', 401))
@@ -22,7 +22,17 @@ exports.auth = asyncHandler(async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = await User.findById(decoded.id)
+        if (!decoded) {
+            return next(new ErrorResponse('Unauthorized', 401))
+        }
+
+        // not a part of auth, but good for further db queries without params
+        const user = await User.findById(decoded.id)
+        if (!user) {
+            return next(new ErrorResponse('Unauthorized', 401))
+        }
+        
+        req.user = user
         next()
     } catch (error) {
         return next(new ErrorResponse('Unauthorized', 401))

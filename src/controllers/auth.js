@@ -4,10 +4,15 @@ const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 
-// @desc register user
-// @route /api/v1/auth/register
-// @access public
-exports.register = asyncHandler(async (req, res, next) => {
+const { sendTokenResponse } = require("../utils/token-response")
+
+
+/**
+ * @desc Register user
+ * @access public   role["All"]
+ * @route POST api/v1/auth/register
+ */
+exports.register = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
 
     // Create user
@@ -20,9 +25,11 @@ exports.register = asyncHandler(async (req, res, next) => {
     sendTokenResponse(user, 200, res)
 })
 
-// @desc login user
-// @route /api/v1/auth/login
-// @access private
+/**
+ * @desc Login user
+ * @access public   role["All"]
+ * @route POST api/v1/auth/login
+ */
 exports.login = asyncHandler(async (req, res, next) => {
 
     const { email, password } = req.body
@@ -44,10 +51,13 @@ exports.login = asyncHandler(async (req, res, next) => {
     sendTokenResponse(user, 200, res)
 })
 
-// @desc login user
-// @route GET /api/v1/auth/login/me
-// @access private
-exports.getMe = asyncHandler(async(req, res, next) => {
+
+/**
+ * @desc Get my profile
+ * @access private   role["USER"]
+ * @route POST api/v1/auth/me
+ */
+exports.getMe = asyncHandler(async(req, res) => {
     const user = await User.findById(req.user.id)
     res.json({
         success: true,
@@ -55,10 +65,13 @@ exports.getMe = asyncHandler(async(req, res, next) => {
     })
 })
 
-// @desc update user details
-// @route PATCH /api/v1/auth/updateDetails
-// @access private
-exports.updateDetails = asyncHandler(async(req, res, next) => {
+
+/**
+ * @desc Update user details
+ * @access private   role["USER"]
+ * @route PATCH /api/v1/auth/updateDetails
+ */
+exports.updateDetails = asyncHandler(async(req, res) => {
     const fieldsToUpdate = {
         name: req.body.name,
         email: req.body.email
@@ -73,9 +86,12 @@ exports.updateDetails = asyncHandler(async(req, res, next) => {
     })
 })
 
-// @desc update password
-// @route GET /api/v1/auth/updatepassword
-// @access private
+
+/**
+ * @desc Update user password
+ * @access private   role["USER"]
+ * @route PATCH /api/v1/auth/updatepassword
+ */
 exports.updatePassword = asyncHandler(async(req, res, next) => {
 
     const user = await User.findById(req.user.id).select('+password')
@@ -90,9 +106,12 @@ exports.updatePassword = asyncHandler(async(req, res, next) => {
     sendTokenResponse(user, 200, res)
 })
 
-// @desc forgot password
-// @route POST /api/v1/auth/forgotpassword
-// @access public
+
+/**
+ * @desc Forgot user password
+ * @access public   role["USER"]
+ * @route POST /api/v1/auth/forgotpassword
+ */
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
   
@@ -131,9 +150,12 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     }
   });
 
-// @desc reset password
-// @route PUT /api/v1/auth/resetpassword/:resettoken
-// @access public
+
+/**
+ * @desc Reset user password
+ * @access public   role["USER"]
+ * @route  PUT /api/v1/auth/resetpassword/:resettoken
+ */
 exports.resetPassword = asyncHandler(async(req, res, next) => {
 
     const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex')
@@ -153,40 +175,20 @@ exports.resetPassword = asyncHandler(async(req, res, next) => {
     sendTokenResponse(user, 200, res)
 })
 
-// @desc logout user / clear cookie
-// @route GET /api/v1/auth/logout
-// @access private
-exports.logout = asyncHandler(async(req, res, next) => {
+
+/**
+ * @desc logout user / clear cookie
+ * @access private  role["USER"]
+ * @route  GET /api/v1/auth/logout
+ */
+exports.logout = asyncHandler(async(req, res) => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10*1000),
-        httpOnly: true
+        httpOnly: true,
+        secure: true
     })
     res.json({
         success: true,
         data: {}
     })
 })
-
-
-
-// get token from model, create cookie and send response
-const sendTokenResponse = (user, statusCode, res) => {
-    const token = user.generateAuthToken()
-
-    const options = {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-        httpOnly: true
-    }
-
-    if (process.env.NODE_ENV === 'production') {
-        options.secure = true
-    }
-
-    res
-     .status(statusCode)
-     .cookie('token',token, options)
-     .json({
-         success: true,
-         token
-     })
-}

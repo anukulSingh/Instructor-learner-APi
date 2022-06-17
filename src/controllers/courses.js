@@ -4,15 +4,16 @@ const Course = require('../models/Course');
 const Bootcamp = require('../models/Bootcamp');
 
 
-// @desc    Get all courses
-// @route   GET api/v1/courses
-// @route   GET api/v1/bootcamps/:bootcampId/courses
-// @access  Public
-
-exports.getCourses = asyncHandler(async (req, res, next) => {
+/**
+ * @desc Get all courses
+ * @access public   role["ALL"]
+ * @route  GET api/v1/courses
+ * @route  GET api/v1/bootcamps/:bootcampId/courses
+ */
+exports.getCourses = asyncHandler(async (req, res) => {
 
     if (req.params.bootcampId) {
-        const courses = Course.find({ bootcamp: req.params.bootcampId })
+        const courses = await Course.find({ bootcamp: req.params.bootcampId })
 
         return res.json({
             success: true,
@@ -26,19 +27,20 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
 })
 
 
-// @desc    Get single course
-// @route   GET api/v1/course/:id
-// @access  Public
-
+/**
+ * @desc Get a course
+ * @access public   role["ALL"]
+ * @route  GET api/v1/courses/:courseId
+ */
 exports.getCourse = asyncHandler(async (req, res, next) => {
     
-    const course = await Course.findById(req.params.id).populate({
+    const course = await Course.findById(req.params.courseId).populate({
         path: 'bootcamp',
         select: 'name description'
     })
 
     if (!course) {
-        return next(new ErrorResponse(`Resource with id ${req.params.id} not found`, 404))
+        return next(new ErrorResponse(`Resource with id ${req.params.courseId} not found`, 404))
     }
 
     res.json({
@@ -47,10 +49,12 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
     })
 })
 
-// @desc    Add a course
-// @route   POST api/v1/bootcamps/:bootcamId/courses
-// @access  Private
 
+/**
+ * @desc Add a course
+ * @access private   role["PUBLISHER", "ADMIN"]
+ * @route  POST api/v1/bootcamps/:bootcamId/courses
+ */
 exports.addCourse = asyncHandler(async (req, res, next) => {
 
     req.body.bootcamp = req.params.bootcampId
@@ -80,10 +84,12 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
     })
 })
 
-// @desc    Update a course
-// @route   POST api/v1/courses/:id
-// @access  Private
 
+/**
+ * @desc Update a course
+ * @access private   role["PUBLISHER", "ADMIN"]
+ * @route  POST api/v1/courses/courseId
+ */
 exports.updateCourse = asyncHandler(async (req, res, next) => {
 
     
@@ -114,6 +120,7 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
         data: course
     })
 })
+
 
 
 // @desc    Delete a course

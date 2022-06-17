@@ -3,23 +3,26 @@ const asyncHandler = require('../middleware/async');
 const Bootcamp = require('../models/Bootcamp');
 const geocoder = require('../utils/geocoder');
 
-
-// @desc    Get all bootcamps
-// @route   GET api/v1/bootcamps
-// @access  Public
-exports.getBootcamps = asyncHandler(async (req, res, next) => {
+/**
+ * @desc Fetches all bootcamps
+ * @access public   role["ALL"]
+ * @route GET  /api/v1/bootcamps
+ */
+exports.getBootcamps = asyncHandler(async (req, res) => {
 
     res.json(res.advancedResults)
 })
 
-// @desc    Get a bootcamp
-// @route   GET api/v1/bootcamps/:id
-// @access  Public
+/**
+ * @desc Fetches a bootcamp
+ * @access public   role["ALL"]
+ * @route GET  /api/v1/bootcamps/:bootcampId
+ */
 exports.getBootcamp = asyncHandler(async (req, res, next) => {
 
      const bootcamp = await Bootcamp.findById(req.params.id);
         if (!bootcamp) {
-            return next(new ErrorResponse(`Resource with id ${req.params.id} not found`, 404))
+            return next(new ErrorResponse(`Resource with id ${req.params.bootcampId} not found`, 404))
         }
         res.json({
             success: true,
@@ -27,9 +30,12 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
         })
 })
 
-// @desc Create a new bootcamp
-// @route POST /api/v1/bootcamps
-// @access Private
+
+/**
+ * @desc Creates a bootcamp
+ * @access public   role["PUBLISHER , ADMIN"]
+ * @route POST  /api/v1/bootcamps
+ */
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
 
     req.body.user = req.user.id
@@ -47,15 +53,16 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
             })
 })
 
-
-// @desc    Update a bootcamp
-// @route   PATCH api/v1/bootcamps/:id
-// @access  Private
+/**
+ * @desc Updates a bootcamp
+ * @access private   role["PUBLISHER , ADMIN"]
+ * @route PATCH  /api/v1/bootcamps/:bootcampId
+ */
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 
-     let bootcamp = await Bootcamp.findById(req.params.id)
+     let bootcamp = await Bootcamp.findById(req.params.bootcampId)
         if (!bootcamp) {
-            return next(new ErrorResponse(`Resource with id ${req.params.id} not found`, 404))
+            return next(new ErrorResponse(`Resource with id ${req.params.bootcampId} not found`, 404))
         }
         // make sure user is bootcamp owner
         if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
@@ -65,7 +72,7 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
             ))
         }
 
-        bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+        bootcamp = await Bootcamp.findByIdAndUpdate(req.params.bootcampId, req.body, {
             new: true,
             runValidators: true
         })
@@ -76,16 +83,17 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 })
 
 
-
-// @desc    Delete a bootcamp
-// @route   DELETE api/v1/bootcamps/:id
-// @access  Private
+/**
+ * @desc Deletes a bootcamp
+ * @access private   role["PUBLISHER , ADMIN"]
+ * @route DELETE  /api/v1/bootcamps/:bootcampId
+ */
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
 
-        const bootcamp = await Bootcamp.findById(req.params.id)
+        const bootcamp = await Bootcamp.findById(req.params.bootcampId)
 
         if (!bootcamp) {
-            return next(new ErrorResponse(`Resource with id ${req.params.id} not found`, 404))
+            return next(new ErrorResponse(`Resource with id ${req.params.bootcampId} not found`, 404))
         }
         if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
             return next(new ErrorResponse(
@@ -101,13 +109,14 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
         })  
 })
 
+/**
+ * @desc Get bootcamps within a radius (in miles)
+ * @access private   role["PUBLISHER , ADMIN"]
+ * @route GET api/v1/bootcamps/radius/:zipcode/:distance
+ */
+exports.getBootcampInRadius = asyncHandler(async (req, res) => {
 
-// @desc    Get bootcamps within a radius (in miles)
-// @route   GET api/v1/bootcamps/radius/:zipcode/:distance
-// @access  Private
-exports.getBootcampInRadius = asyncHandler(async (req, res, next) => {
-
-    const { zipcode,distance } = req.params;
+    const { zipcode, distance } = req.params;
 
     // Get lat/lang from geocoder
     const loc = await geocoder.geocode(zipcode);
